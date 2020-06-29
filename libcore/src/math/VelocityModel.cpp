@@ -469,12 +469,27 @@ Point VelocityModel::ForceRepRoom(Pedestrian * ped, SubRoom * subroom) const
     }
 
     // and finally the closed doors
+    
     for(const auto & trans : subroom->GetAllTransitions()) {
         if(!trans->IsOpen()) {
             f += ForceRepWall(ped, *(static_cast<Line *>(trans)), centroid, inside);
         }
     }
-
+    /*
+    for (const auto & goal : subroom->GetAllTransitions()) {
+        if (!goal->IsOpen())
+        {
+            f += ForceRepWall(ped, *(static_cast<Line*>(goal)), centroid, inside);
+        }
+        //door is open, but it's not my door (has influence)
+        int uid1 = goal->GetUniqueID();
+        int uid2 = ped->GetExitIndex();
+        if((uid1 != uid2) && (goal->IsOpen()==true ))
+        {
+            f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)), centroid, inside);
+        }
+    }
+    */
     return f;
 }
 

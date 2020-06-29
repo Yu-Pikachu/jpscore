@@ -102,6 +102,7 @@ Pedestrian::Pedestrian()
     _building            = nullptr;
     _spotlight           = false;
     _ticksInThisRoom     = 0;
+    _signRecord          = false;//Yu changed 02.06.2020
 
     _agentsCreated++; //increase the number of object created
     _FED_In           = 0.0;
@@ -183,6 +184,7 @@ Pedestrian::Pedestrian(const StartDistribution & agentsParameters, Building & bu
     _ToxicityAnalysis = nullptr;
     _WalkingSpeed     = nullptr;
     _waitingPos = Point(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
+    _signRecord       = false;//Yu changed 02.06.2020
 }
 
 
@@ -211,6 +213,16 @@ void Pedestrian::SetRoomID(int i, std::string roomCaption)
 void Pedestrian::SetSubRoomID(int i)
 {
     _subRoomID = i;
+}
+
+void Pedestrian::SetOldRoomID(int i)
+{
+    _oldRoomID      = i;
+}
+
+void Pedestrian::SetOldSubRoomID(int i)
+{
+    _oldSubRoomID = i;
 }
 
 void Pedestrian::SetSubRoomUID(int i)
@@ -358,6 +370,26 @@ int Pedestrian::GetSubRoomID() const
 int Pedestrian::GetSubRoomUID() const
 {
     return _subRoomUID;
+}
+
+int Pedestrian::GetOldRoomID() const
+{
+    return _oldRoomID;
+}
+
+int Pedestrian::GetOldSubRoomID() const
+{
+    return _oldSubRoomID;
+}//Yu changed 01.06.2020
+
+bool Pedestrian::GetSignRecord() const
+{
+    return _signRecord;
+}
+
+void Pedestrian::SetSignRecord(bool tf)
+{
+    _signRecord = tf;
 }
 
 double Pedestrian::GetMass() const
@@ -1150,11 +1182,15 @@ bool Pedestrian::Relocate(std::function<void(const Pedestrian &)> flowupdater)
                 *this); //@todo: ar.graf : this call should move into a critical region? check plz
             ClearMentalMap(); // reset the destination
             const int oldRoomID = _roomID;
+            SetOldRoomID(_roomID);
+            SetOldSubRoomID(_subRoomID);
             SetRoomID(room->GetID(), room->GetCaption());
             SetSubRoomID(sub->second->GetSubRoomID());
             SetSubRoomUID(sub->second->GetUID());
             _router->FindExit(this);
+            _signRecord = true;
             if(oldRoomID != room->GetID()) {
+                _signRecord = false;//Yu changed 02.06.2020
                 //the agent left the old room
                 //actualize the egress time for that room
 #pragma omp critical(SetEgressTime)

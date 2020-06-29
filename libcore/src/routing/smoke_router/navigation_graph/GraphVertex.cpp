@@ -160,7 +160,6 @@ const GraphEdge * GraphVertex::GetCheapestDestinationByEdges(const Point & posit
         destinations[(*it)] = std::make_pair((const GraphEdge *) nullptr, new_distance);
         queue.push(std::make_pair(new_distance, (*it)));
     }
-
     while(!queue.empty()) {
         const GraphEdge * act_edge = queue.top().second;
         double act_distance        = queue.top().first;

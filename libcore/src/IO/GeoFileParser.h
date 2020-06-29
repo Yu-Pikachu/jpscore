@@ -23,7 +23,7 @@
 #include "general/Configuration.h"
 #include "geometry/Building.h"
 #include "geometry/GeometryReader.h"
-
+#include "geometry/SignZone.h"
 #include <tinyxml.h>
 
 //TODO: the class name GeoFileParser is misleading as the ``geometry'' file contains among others also relations (transitions)
@@ -42,6 +42,7 @@ public:
     Goal * parseGoalNode(TiXmlElement * e);
     Transition * parseTransitionNode(TiXmlElement * xTrans, Building * building);
     Goal * parseWaitingAreaNode(TiXmlElement * e);
+    SignZone * parseSignZoneNode(TiXmlElement * e);//Yu changed 24.03.2020
     bool LoadTrainInfo(Building * building);
     bool LoadTrainTimetable(Building * building, TiXmlElement * xRootNode);
     bool LoadTrainType(Building * building, TiXmlElement * xRootNode);

@@ -147,6 +147,8 @@ private:
     bool _waiting    = false;
     Point _waitingPos;
 
+    bool _signRecord;
+
 public:
     // public member
     int _ticksInThisRoom;
@@ -161,6 +163,8 @@ public:
     void SetRoomID(int i, std::string roomCaption);
     void SetSubRoomID(int i);
     void SetSubRoomUID(int i);
+    void SetOldRoomID(int i);
+    void SetOldSubRoomID(int i);
     void SetMass(double m);
     void SetTau(double tau);
     void SetEllipse(const JEllipse & e);
@@ -204,6 +208,10 @@ public:
     int GetRoomID() const;
     int GetSubRoomID() const;
     int GetSubRoomUID() const;
+    int GetOldRoomID() const;
+    int GetOldSubRoomID() const;//Yu changed 01.06.2020
+    bool GetSignRecord() const;
+    void SetSignRecord(bool tf);
     double GetMass() const;
     double GetTau() const;
     const JEllipse & GetEllipse() const;

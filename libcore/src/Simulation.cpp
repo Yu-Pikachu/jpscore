@@ -249,7 +249,9 @@ void Simulation::UpdateRoutesAndLocations()
             bool assigned = false;
             std::function<void(const Pedestrian &)> f =
                 std::bind(&Simulation::UpdateFlowAtDoors, this, std::placeholders::_1);
+            std::cout<<"relocate"<<std::endl;
             assigned = ped->Relocate(f);
+            std::cout<<"relocate_end"<<std::endl;
             //this will delete agents, that are pushed outside (maybe even if inside obstacles??)
 
             if(!assigned) {
@@ -260,7 +262,7 @@ void Simulation::UpdateRoutesAndLocations()
                 allRooms.at(ped->GetRoomID())->SetEgressTime(Pedestrian::GetGlobalTime());
             }
         }
-
+        /*   this part will make the ped find route repeatedly(every"findroute"), strongly influence sign route due to random probability
         // set ped waiting, if no target is found
         int target = ped->FindRoute();
 
@@ -312,7 +314,7 @@ void Simulation::UpdateRoutesAndLocations()
                 }
             }
         }
-
+        */
         // Get new goal for pedestrians who are inside waiting area and wait time is over
         // Check if current position is already waiting area
         // yes: set next goal and return findExit(p)

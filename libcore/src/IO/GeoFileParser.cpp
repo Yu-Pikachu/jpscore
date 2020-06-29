@@ -25,6 +25,7 @@
 #include "geometry/SubRoom.h"
 #include "geometry/WaitingArea.h"
 #include "geometry/Wall.h"
+#include "geometry/SignZone.h"//Yu changed 24.03.2020
 
 #include <tinyxml.h>
 
@@ -348,6 +349,16 @@ bool GeoFileParser::LoadRoutingInfo(Building * building)
             if(goal) {
                 building->AddGoal(goal);
                 _configuration->GetRoutingEngine()->AddFinalDestinationID(goal->GetId());
+            }
+        }
+
+        //Yu changed 24.03.2020
+        //----parse sign zone list from inifile
+        for(TiXmlElement * e = xGoalsNode->FirstChildElement("sign_zone"); e;
+            e                = e->NextSiblingElement("sign_zone")) {
+            SignZone * sign = parseSignZoneNode(e);
+            if(sign){
+                building->AddSign(sign);
             }
         }
 
@@ -887,6 +898,168 @@ Goal * GeoFileParser::parseWaitingAreaNode(TiXmlElement * e)
 
     LOG_INFO("waiting area {:d}: finished parsing waiting area.", wa->GetId());
     return wa;
+}
+
+//Yu changed 24.03.2020
+SignZone * GeoFileParser::parseSignZoneNode(TiXmlElement * e)
+{
+    LOG_INFO("Loading Sign Zone");
+
+    SignZone * sign = new SignZone();
+
+    // Read mandatory values and check for valid values, on fail write error
+    
+    // Read caption and check if correct value
+    if(const char * attribute = e->Attribute("caption"); attribute) {
+        if(std::string value = xmltoa(attribute, ""); !value.empty()) {
+            sign->SetCaption(value);
+        } else {
+            sign->SetCaption("sign " + std::to_string(sign->GetSignID()));
+        }
+    }
+    
+    // Read id and check for correct value
+    if(const char * attribute = e->Attribute("id"); attribute) {
+        if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
+            sign->SetSignID(value);
+        } else {
+            LOG_ERROR(" Sign Zone id set but not an integer");
+            delete sign;
+            return nullptr;
+        }
+    } else {
+        LOG_ERROR(" Sign Zone id required");
+        delete sign;
+        return nullptr;
+    }
+
+    // Read room_id and check for correct value
+    if(const char * attribute = e->Attribute("room_id"); attribute) {
+        if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
+            sign->SetRoomID(value);
+        } else {
+            LOG_ERROR("Sign Zone {:d}: room_id set but not an integer", sign->GetSignID());
+            delete sign;
+            return nullptr;
+        }
+    } else {
+        LOG_ERROR("Sign Zone {:d}: room_id required", sign->GetSignID());
+        delete sign;
+        return nullptr;
+    }
+
+    // Read subroom_id and check for correct value
+    if(const char * attribute = e->Attribute("subroom_id"); attribute) {
+        if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
+            sign->SetSubRoomID(value);
+        } else {
+            LOG_ERROR("Sign Zone {:d}: subroom_id set but not an integer", sign->GetSignID());
+            delete sign;
+            return nullptr;
+        }
+    } else {
+        LOG_ERROR("Sign Zone {:d}: subroom_id required", sign->GetSignID());
+        delete sign;
+        return nullptr;
+    }
+
+    LOG_INFO("Goal id: {:d}", sign->GetSignID());
+    LOG_INFO("Goal caption: {:s}", sign->GetCaption().c_str());
+    LOG_INFO("Goal room_id: {:d}", sign->GetRoomID());
+    LOG_INFO("Goal subroom_id: {:d}", sign->GetSubRoomID());
+    
+    //Read the sign direction
+    if(const char * attribute = e->Attribute("sign_direction"); attribute) {
+        if(std::string value = xmltoa(attribute, ""); !value.empty()){
+            sign->SetSignDirection(value);
+        }
+    }
+
+    //Read the sign position
+    if(const char * attribute = e->Attribute("sign_position"); attribute) {
+        if(std::string value = xmltoa(attribute, ""); !value.empty()){
+            sign->SetSignPosition(value);
+        }
+    }
+
+    // Read opposite Transition id and check for correct value
+    if(const char * attribute = e->Attribute("opposite_tran_id"); attribute) {
+        if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
+            sign->SetOppositeTransitionID(value);
+        } else {
+            LOG_ERROR("Sign Zone {:d}: opposite Transition id set but not an integer", sign->GetSignID());
+            delete sign;
+            return nullptr;
+        }
+    } else {
+        LOG_ERROR("Sign Zone {:d}: opposite Transition id required", sign->GetSignID());
+        delete sign;
+        return nullptr;
+    }
+
+    // Read left_tran_id and check for correct value
+    if(const char * attribute = e->Attribute("left_tran_id"); attribute) {
+        if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
+            sign->SetLeftTransitionID(value);
+        } else {
+            LOG_ERROR("Sign Zone {:d}: left_tran_id set but not an integer", sign->GetSignID());
+            delete sign;
+            return nullptr;
+        }
+    } else {
+        LOG_ERROR("Sign Zone {:d}: left_tran_id required", sign->GetSignID());
+        delete sign;
+        return nullptr;
+    }
+
+    // Read right_tran_id and check for correct value
+    if(const char * attribute = e->Attribute("right_tran_id"); attribute) {
+        if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
+            sign->SetRightTransitionID(value);
+        } else {
+            LOG_ERROR("Sign Zone {:d}: right_tran_id set but not an integer", sign->GetSignID());
+            delete sign;
+            return nullptr;
+        }
+    } else {
+        LOG_ERROR("Sign Zone {:d}: right_tran_id required", sign->GetSignID());
+        delete sign;
+        return nullptr;
+    }
+
+    // Read entering_sub/room_id and check for correct value
+    if(const char * attribute = e->Attribute("entering_room_id"); attribute) {
+        if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
+            sign->SetEnteringRoomID(value);
+        } else {
+            LOG_ERROR("Sign Zone {:d}: entering_room_id set but not an integer", sign->GetSignID());
+            delete sign;
+            return nullptr;
+        }
+    } else {
+        LOG_ERROR("Sign Zone {:d}: entering_room_id required", sign->GetSignID());
+        delete sign;
+        return nullptr;
+    }
+    if(const char * attribute = e->Attribute("entering_subroom_id"); attribute) {
+        if(int value = xmltoi(attribute, -1); value > -1 && attribute == std::to_string(value)) {
+            sign->SetEnteringSubRoomID(value);
+        } else {
+            LOG_ERROR("Sign Zone {:d}: entering_subroom_id set but not an integer", sign->GetSignID());
+            delete sign;
+            return nullptr;
+        }
+    } else {
+        LOG_ERROR("Sign Zone {:d}: entering_subroom_id required", sign->GetSignID());
+        delete sign;
+        return nullptr;
+    }
+    
+   
+    //calculate other configurations
+    sign->SetOthers();
+
+    return sign; 
 }
 
 bool GeoFileParser::LoadTrainInfo(Building * building)

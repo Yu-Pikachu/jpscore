@@ -156,6 +156,13 @@ Building::~Building()
     for(std::map<int, Goal *>::const_iterator iter = _goals.begin(); iter != _goals.end(); ++iter) {
         delete iter->second;
     }
+    //Yu changed 24.03.2020
+    if(!_SignList.empty()){
+        for(SignZone * sign : _SignList){
+            delete sign;
+        }
+        _SignList.clear();
+    }
 }
 
 Configuration * Building::GetConfig() const
@@ -754,6 +761,17 @@ bool Building::AddGoal(Goal * goal)
 
 
     return true;
+}
+
+//Yu changed 24.03.2020
+void Building::AddSign(SignZone * sign)
+{
+    Building::_SignList.push_back(sign);
+}
+
+std::vector<SignZone *> Building::GetSignList() const
+{
+    return Building::_SignList;
 }
 
 bool Building::AddTrainType(std::shared_ptr<TrainType> TT)

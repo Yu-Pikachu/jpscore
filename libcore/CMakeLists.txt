@@ -30,6 +30,7 @@ set(source_files
     src/geometry/SubRoom.cpp
     src/geometry/Transition.cpp
     src/geometry/WaitingArea.cpp
+    src/geometry/SignZone.cpp
     src/geometry/Wall.cpp
     src/IO/EventFileParser.cpp
     src/IO/GeoFileParser.cpp
@@ -89,6 +90,7 @@ set(source_files
     src/routing/smoke_router/sensor/locater.cpp
     src/routing/smoke_router/sensor/RoomToFloorSensor.cpp
     src/routing/smoke_router/sensor/SensorManager.cpp
+    src/routing/smoke_router/sensor/SignSensor.cpp
     src/routing/smoke_router/SmokeRouter.cpp
     src/Simulation.cpp
     src/voronoi-boost/VoronoiPositionGenerator.cpp

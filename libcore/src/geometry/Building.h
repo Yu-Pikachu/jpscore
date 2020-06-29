@@ -34,6 +34,8 @@
 #include "Transition.h"
 #include "general/Configuration.h"
 #include "general/Filesystem.h"
+#include "SignZone.h"
+#include <vector>//Yu changed 24.03.2020
 
 typedef std::pair<Point, Wall> PointWall;
 
@@ -103,6 +105,8 @@ private:
     /// pedestrians pathway
     bool _savePathway;
     std::ofstream _pathWayStream;
+
+    std::vector<SignZone *> _SignList;//Yu changed 24.03.2020 store all the signs
 
 public:
     /// constructor
@@ -258,6 +262,8 @@ public:
 
     bool AddGoal(Goal * goal);
 
+    void AddSign(SignZone * sign);//Yu changed 24.03.2020
+
     bool AddTrainType(std::shared_ptr<TrainType> TT);
 
     bool AddTrainTimeTable(std::shared_ptr<TrainTimeTable> TTT);
@@ -295,6 +301,8 @@ public:
       */
 
     std::vector<Point> GetBoundaryVertices() const;
+
+    std::vector<SignZone *> GetSignList() const;//Yu changed 24.03.2020
 
 private:
     bool InitInsideGoals();

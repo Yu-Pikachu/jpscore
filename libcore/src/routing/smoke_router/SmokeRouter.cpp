@@ -57,44 +57,33 @@ int SmokeRouter::FindExit(Pedestrian * p)
 {
     //check for former goal.
     if((*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->HadNoDestination()) {
+        std::cout<<"exit1"<<" "<<p->GetID()<<std::endl;
         sensor_manager->execute(p, SensorManager::INIT);
+        return FindDestination(p);//Yu changed 01.04.2020
     }
 
     //Check if the Pedestrian already has a Dest. or changed subroom and needs a new one.
-    if((*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->ChangedSubRoom()) {
+    else if((*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->ChangedSubRoom()) {
         //execute periodical sensors
+        std::cout<<"exit2"<<" "<<p->GetID()<<std::endl;
         sensor_manager->execute(p, SensorManager::CHANGED_ROOM);
-
         int status = FindDestination(p);
-
         (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->UpdateSubRoom();
-
         return status;
     }
 
     // check if ped reached a hline
-    if((*brain_storage)[p]->HlineReached()) {
+    else if((*brain_storage)[p]->HlineReached()) {
+        std::cout<<"exit3"<<" "<<p->GetID()<<std::endl;
         int status = FindDestination(p);
-
-        //(*cm_storage)[p]->UpdateSubRoom();
-
         return status;
     }
 
-    //std::cout << p->GetGlobalTime() << std::endl;
-    //    if (std::fmod(p->GetGlobalTime(),sensor_manager->GetIntVPeriodicUpdate())==0.0 && p->GetGlobalTime()>0)
-    //    {
-    //        //Log->Write(std::to_string(p->GetGlobalTime()));
-    //        sensor_manager->execute(p, SensorManager::PERIODIC);
-
-    //        int status = FindDestination(p);
-
-    //        //(*cm_storage)[p]->UpdateSubRoom();
-
-    //        return status;
-
-    //    }
-    return 1;
+    else{
+        std::cout<<"exit4"<<" "<<p->GetID()<<std::endl;
+        int status = FindDestination(p);
+        return status;
+    }   //Yu changed 03.06.2020, add three else
 }
 
 int SmokeRouter::FindDestination(Pedestrian * p)
@@ -103,41 +92,21 @@ int SmokeRouter::FindDestination(Pedestrian * p)
     sensor_manager->execute(p, SensorManager::NO_WAY);
     //check if there is a way to the outside the pedestrian knows (in the cognitive map)
     const GraphEdge * destination = nullptr;
-    //Cognitive Map /Associations/ Waypoints/ landmarks
-
-    //        (*cm_storage)[p]->UpdateMap();
-
-    //--------------------COGMAP----------------------------
-    //See if Landmarks are visible
-
-    //(*brain_storage)[p]->GetCognitiveMap().UpdateMap();
-    //Find next appropriate landmark
-    //(*brain_storage)[p]->GetCognitiveMap().FindNextTarget();
-    //Find appropriate door to reach next app. landmark
-    //(*brain_storage)[p]->GetCognitiveMap().AssessDoors();
-    //------------------------------------------------------
-
-    //Log->Write(std::to_string((*cm_storage)[p]->GetOwnPos().GetX())+" "+std::to_string((*cm_storage)[p]->GetOwnPos().GetY()));
-
     destination = (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->GetDestination();
     if(destination == nullptr) {
         //no destination was found, now we could start the discovery!
         //1. run the no_way sensors for room discovery.
-        sensor_manager->execute(p, SensorManager::NO_WAY);
-
+        //sensor_manager->execute(p, SensorManager::NO_WAY);
         //check if this was enough for finding a global path to the exit
 
-        destination = (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->GetDestination();
-
-        if(destination == nullptr) {
+        //destination = (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->GetDestination();
+        //if(destination == nullptr) {
             //we still do not have a way. lets take the "best" local edge
             //for this we don't calculate the cost to exit but calculate the cost for the edges at the actual vertex.
-            destination =
-                (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->GetLocalDestination();
-        }
+        destination =
+            (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->GetLocalDestination();
+        //}
     }
-
-
     //if we still could not found any destination we are lost! Pedestrian will be deleted
     //no destination should just appear in bug case or closed rooms.
     if(destination == nullptr) {
@@ -146,8 +115,9 @@ int SmokeRouter::FindDestination(Pedestrian * p)
     }
 
     (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->AddDestination(destination);
-    sensor_manager->execute(p, SensorManager::NEW_DESTINATION);
-
+    //sensor_manager->execute(p, SensorManager::NEW_DESTINATION);
+    if(destination == nullptr){std::cout<<"dest-6"<<std::endl;}
+    
     const Crossing * nextTarget = destination->GetCrossing();
 
     const NavLine * nextNavLine = (*brain_storage)[p]->GetNextNavLine(nextTarget);
@@ -159,7 +129,7 @@ int SmokeRouter::FindDestination(Pedestrian * p)
     //setting crossing to ped
     p->SetExitLine(nextNavLine);
     p->SetExitIndex(nextNavLine->GetUniqueID());
-    return 1;
+    return nextNavLine->GetUniqueID();//Yu changed in 02.04.2020
 }
 
 
