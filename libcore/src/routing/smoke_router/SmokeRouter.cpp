@@ -252,7 +252,7 @@ fs::path SmokeRouter::GetRoutingInfoFile()
         e                = e->NextSiblingElement("router")) {
         std::string strategy = e->Attribute("description");
 
-        if(strategy == "AI") {
+        if(strategy == "smoke") {
             if(e->FirstChild("parameters")) {
                 if(e->FirstChild("parameters")->FirstChildElement("navigation_lines"))
                     nav_line_file = e->FirstChild("parameters")

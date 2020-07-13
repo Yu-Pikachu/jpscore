@@ -40,7 +40,24 @@ void SignSensor::execute(const Pedestrian * ped,  CognitiveMap & cognitive_map) 
         GraphVertex * vertex = cognitive_map.GetGraphNetwork()->GetNavigationGraph()->operator[](sub_room);
         const GraphVertex::EdgesContainer * edges = vertex->GetAllOutEdges();
         for(GraphVertex::EdgesContainer::iterator it_edges = edges->begin(); it_edges != edges->end(); ++it_edges) {
-            (*it_edges)->SetFactor(1, SignSensor::GetName());//if not in signzone, choose the nearest route
+            (*it_edges)->SetFactor(1.0, GetName());//if not in signzone, choose the nearest route, the way that has not been used will be chosen in priority
+            /*
+            if((*it_edges)->GetDest() != nullptr){
+                (*it_edges)->SetFactor(999999999999999999, GetName());
+            }else{
+                (*it_edges)->SetFactor(1.0, GetName());
+            }
+            */
+            /*
+            if((*it_edges)->GetDest() == nullptr){
+                (*it_edges)->SetFactor(0.1, SignSensor::GetName());
+            }else if((*it_edges)->GetDest()->GetSubRoom()->GetType() == 
+                (*it_edges)->GetSrc()->GetSubRoom()->GetType()){
+                (*it_edges)->SetFactor(100, SignSensor::GetName());
+            }else{
+                (*it_edges)->SetFactor(1.0, GetName());
+            }
+            */
         }
     }
     //std::cout<<ped->GetSignRecord()<<"signRecord"<<std::endl;
