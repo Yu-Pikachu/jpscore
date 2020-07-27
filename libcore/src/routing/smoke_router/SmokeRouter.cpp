@@ -57,7 +57,7 @@ int SmokeRouter::FindExit(Pedestrian * p)
 {
     //check for former goal.
     if((*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->HadNoDestination()) {
-        std::cout<<"exit1"<<" "<<p->GetID()<<std::endl;
+        //std::cout<<"exit1"<<" "<<p->GetID()<<std::endl;
         sensor_manager->execute(p, SensorManager::INIT);
         return FindDestination(p);//Yu changed 01.04.2020
     }
@@ -65,7 +65,7 @@ int SmokeRouter::FindExit(Pedestrian * p)
     //Check if the Pedestrian already has a Dest. or changed subroom and needs a new one.
     else if((*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->ChangedSubRoom()) {
         //execute periodical sensors
-        std::cout<<"exit2"<<" "<<p->GetID()<<std::endl;
+        //std::cout<<"exit2"<<" "<<p->GetID()<<std::endl;
         sensor_manager->execute(p, SensorManager::CHANGED_ROOM);
         int status = FindDestination(p);
         (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->UpdateSubRoom();
@@ -74,13 +74,13 @@ int SmokeRouter::FindExit(Pedestrian * p)
 
     // check if ped reached a hline
     else if((*brain_storage)[p]->HlineReached()) {
-        std::cout<<"exit3"<<" "<<p->GetID()<<std::endl;
+        //std::cout<<"exit3"<<" "<<p->GetID()<<std::endl;
         int status = FindDestination(p);
         return status;
     }
 
     else{
-        std::cout<<"exit4"<<" "<<p->GetID()<<std::endl;
+        //std::cout<<"exit4"<<" "<<p->GetID()<<std::endl;
         int status = FindDestination(p);
         return status;
     }   //Yu changed 03.06.2020, add three else

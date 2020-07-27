@@ -73,7 +73,7 @@ Point DirectionInRangeBottleneck::GetTarget(Room * /*room*/, Pedestrian * ped) c
     Line ExitLine    = Line(p1, p2, 0);
     Point Lot        = ExitLine.LotPoint(ped->GetPos());
     Point ExitMiddle = (p1 + p2) * 0.5;
-    double d         = 0.4;//this is the bmax in direction method 3
+    double d         = 0.35;//this is the bmax in direction method 3
 
     Point diff = (p1 - p2).Normalized() * d;
     Line e_neu = Line(p1 - diff, p2 + diff, 0);

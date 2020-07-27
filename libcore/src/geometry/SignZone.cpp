@@ -136,9 +136,13 @@ void SignZone::SetOthers(){
     }
     //define the sign probability
     if(SignZone::_SignPosition){
-        SignZone::_SignPro = {1,1,1,1,1,1,1,1,1};//T junction probability
+        //SignZone::_SignPro = {1,1,1,1,1,1,1,1,1};//T junction probability
+        SignZone::_SignPro = {0.758, 0.483, 0.385, 0.920, 0.793, 0.850, 0.758, 0.839,0.875};
+        //SignZone::_SignPro = {0, 0.483, 0.385, 0, 0.793, 0.850, 0, 0.839,0.875};
     }else{
         //SignZone::_SignPro = {0.333,0.411,0.571,0.535,0.218,0.422,0.643,0.762,0.885};//room probability, not twinkle, door top
-        SignZone::_SignPro = {1,1,1,1,1,1,1,1,1};//for test use
+        //SignZone::_SignPro = {1,1,1,1,1,1,1,1,1};//for test use
+        SignZone::_SignPro = {0.788, 0.460, 0.333, 0.731, 0.621, 0.941, 0.535, 0.782, 0.578};
+        //SignZone::_SignPro = {0, 0.460, 0.333, 0, 0.621, 0.941, 0, 0.782, 0.578};
     }
 }

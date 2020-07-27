@@ -44,6 +44,7 @@
 #include "routing/ff_router/ffRouter.h"
 
 #include <tinyxml.h>
+#include <ctime>
 
 // TODO: add these variables to class simulation
 std::map<std::string, std::shared_ptr<TrainType>> TrainTypes;
@@ -249,9 +250,9 @@ void Simulation::UpdateRoutesAndLocations()
             bool assigned = false;
             std::function<void(const Pedestrian &)> f =
                 std::bind(&Simulation::UpdateFlowAtDoors, this, std::placeholders::_1);
-            std::cout<<"relocate"<<std::endl;
+            //std::cout<<"relocate"<<std::endl;
             assigned = ped->Relocate(f);
-            std::cout<<"relocate_end"<<std::endl;
+            //std::cout<<"relocate_end"<<std::endl;
             //this will delete agents, that are pushed outside (maybe even if inside obstacles??)
 
             if(!assigned) {
@@ -354,12 +355,14 @@ void Simulation::PrintStatistics(double simTime)
     for(const auto & itr : _building->GetAllTransitions()) {
         Transition * goal = itr.second;
         if(goal->GetDoorUsage()) {
-            LOG_INFO(
+            if(goal->GetType() == "emergency"){
+                LOG_INFO(
                 "Exit ID [{}] used by [{}] pedestrians. Last passing time [{:.2f}] s",
                 goal->GetID(),
                 goal->GetDoorUsage(),
                 goal->GetLastPassingTime());
-
+            }
+            
             fs::path statsfile{"flow_exit_id_" + std::to_string(goal->GetID()) + "_"};
             if(goal->GetOutflowRate() < std::numeric_limits<double>::max()) {
                 statsfile += "rate_";

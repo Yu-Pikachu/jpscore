@@ -23,7 +23,7 @@ std::string SignSensor::GetName() const
 void SignSensor::execute(const Pedestrian * ped,  CognitiveMap & cognitive_map) const
 {
     //check and get current signzone
-    std::cout<<ped->GetID()<<"ped"<<std::endl;
+    //std::cout<<ped->GetID()<<"ped"<<std::endl;
     bool active = false;
     std::vector<SignZone *> SignLists = building->GetSignList();
     int CurrentSubRoomID = ped->GetSubRoomID();
@@ -35,29 +35,15 @@ void SignSensor::execute(const Pedestrian * ped,  CognitiveMap & cognitive_map) 
     }
     //std::cout<<active<<"active"<<std::endl;
     if(!active){
-        std::cout<<"check out"<<std::endl;
+        //std::cout<<"check out"<<std::endl;
         SubRoom * sub_room = building->GetRoom(CurrentRoomID)->GetSubRoom(CurrentSubRoomID);
         GraphVertex * vertex = cognitive_map.GetGraphNetwork()->GetNavigationGraph()->operator[](sub_room);
         const GraphVertex::EdgesContainer * edges = vertex->GetAllOutEdges();
         for(GraphVertex::EdgesContainer::iterator it_edges = edges->begin(); it_edges != edges->end(); ++it_edges) {
             (*it_edges)->SetFactor(1.0, GetName());//if not in signzone, choose the nearest route, the way that has not been used will be chosen in priority
-            /*
-            if((*it_edges)->GetDest() != nullptr){
-                (*it_edges)->SetFactor(999999999999999999, GetName());
-            }else{
-                (*it_edges)->SetFactor(1.0, GetName());
-            }
-            */
-            /*
-            if((*it_edges)->GetDest() == nullptr){
-                (*it_edges)->SetFactor(0.1, SignSensor::GetName());
-            }else if((*it_edges)->GetDest()->GetSubRoom()->GetType() == 
-                (*it_edges)->GetSrc()->GetSubRoom()->GetType()){
-                (*it_edges)->SetFactor(100, SignSensor::GetName());
-            }else{
-                (*it_edges)->SetFactor(1.0, GetName());
-            }
-            */
+        }
+        if(sub_room->GetType() == "T_sign"){
+            RandomPassT(ped, cognitive_map);
         }
     }
     //std::cout<<ped->GetSignRecord()<<"signRecord"<<std::endl;
@@ -69,7 +55,8 @@ void SignSensor::execute(const Pedestrian * ped,  CognitiveMap & cognitive_map) 
         const GraphVertex::EdgesContainer * edges = vertex->GetAllOutEdges();
         //bool signHeight = CurrentSignZone->GetSignHeight();//now the related probability has not been imported, the room sign is low and the t-junction is high  
         if(FirstEnteringCheck(ped)){
-            std::cout<<"check in"<<std::endl;
+            //for the ped will be influenced by signs
+            //std::cout<<"check in"<<std::endl;
             int targer_Transition_ID = SignSensor::GetTargetTransitionID(ped);//this is transition ID, not unique line ID
             int target_unique_ID = (building->GetTransition(targer_Transition_ID))->GetUniqueID();
             for(GraphVertex::EdgesContainer::iterator it_edges = edges->begin(); it_edges != edges->end(); ++it_edges) {
@@ -94,41 +81,54 @@ void SignSensor::execute(const Pedestrian * ped,  CognitiveMap & cognitive_map) 
                 }
             }
             else{
-                std::cout<<"pass T"<<std::endl;
-                int random_jundgement = 0;
-                std::cout<<random_jundgement<<std::endl;
-                for(GraphVertex::EdgesContainer::iterator it_edges = edges->begin(); it_edges != edges->end(); ++it_edges) {
-                    Hline * tran_tem = building->GetTransOrCrossByUID((*it_edges)->GetCrossing()->GetUniqueID());
-                    Point ped_tem = ped->GetPos();
-                    std::cout<<random_jundgement<<std::endl;
-                    if(Distance(tran_tem->GetCentre(),ped_tem)<0.15){
-                        (*it_edges)->SetFactor(5, SignSensor::GetName());//find the coming tran
-                    }else{
-                        if(random_jundgement == 0){//have not decided direction
-                            RandomNumberGenerator e;
-                            double ra_direction = e.GetRandomRealBetween0and1();
-                            std::cout<<ra_direction<<std::endl;
-                            if(ra_direction<0.5){
-                                (*it_edges)->SetFactor(0.1, SignSensor::GetName());
-                                random_jundgement = 1;
-                            }else{
-                                (*it_edges)->SetFactor(5, SignSensor::GetName());
-                                random_jundgement = 2;
-                            }
-                            
-                        }else{//have chosen direction
-                            if(random_jundgement == 1){
-                                (*it_edges)->SetFactor(5, SignSensor::GetName());
-                            }else if(random_jundgement == 2){
-                                (*it_edges)->SetFactor(0.1, SignSensor::GetName());
-                            }
-                        }
-                    }            
-                }
+                RandomPassT(ped, cognitive_map);
             }
         }
     }
 };
+
+void SignSensor::RandomPassT(const Pedestrian * ped, CognitiveMap & cognitive_map) const
+{
+    int CurrentSubRoomID = ped->GetSubRoomID();
+    int CurrentRoomID = ped->GetRoomID();
+    SubRoom * sub_room = building->GetRoom(CurrentRoomID)->GetSubRoom(CurrentSubRoomID);
+    GraphVertex * vertex = cognitive_map.GetGraphNetwork()->GetNavigationGraph()->operator[](sub_room);
+    const GraphVertex::EdgesContainer * edges = vertex->GetAllOutEdges();
+
+    //std::cout<<"pass T"<<std::endl;
+
+    int random_jundgement = 0;
+    
+    //std::cout<<random_jundgement<<std::endl;
+    
+    for(GraphVertex::EdgesContainer::iterator it_edges = edges->begin(); it_edges != edges->end(); ++it_edges) {
+        Hline * tran_tem = building->GetTransOrCrossByUID((*it_edges)->GetCrossing()->GetUniqueID());
+        Point ped_tem = ped->GetPos();
+        //std::cout<<random_jundgement<<std::endl;
+        if(Distance(tran_tem->GetCentre(),ped_tem)<0.15){
+            (*it_edges)->SetFactor(5, SignSensor::GetName());//find the coming tran
+        }else{
+            if(random_jundgement == 0){//have not decided direction
+                RandomNumberGenerator e;
+                double ra_direction = e.GetRandomRealBetween0and1();
+                //std::cout<<ra_direction<<std::endl;
+                if(ra_direction<0.5){
+                    (*it_edges)->SetFactor(0.1, SignSensor::GetName());
+                    random_jundgement = 1;
+                }else{
+                    (*it_edges)->SetFactor(5, SignSensor::GetName());
+                    random_jundgement = 2;
+                }
+            }else{//have chosen direction
+                if(random_jundgement == 1){
+                    (*it_edges)->SetFactor(5, SignSensor::GetName());
+                }else if(random_jundgement == 2){
+                    (*it_edges)->SetFactor(0.1, SignSensor::GetName());
+                }
+            }
+        }            
+    }
+}
 
 //get the current sign zone of the ped
 SignZone * SignSensor::GetCurrentSignZone(const Pedestrian * ped) const
@@ -160,14 +160,20 @@ std::vector<Pedestrian *> SignSensor::GetSurroundingPeople(const Pedestrian * pe
         std::back_inserter(SurroundAllPed),
         [RoomID, SubRoomID](auto & p) { return p->GetRoomID() == RoomID && p->GetSubRoomID() == SubRoomID; });
     std::vector<Pedestrian *> SurroundPed; //store the considered ped, except those opposite to our main person
-    for(std::vector<Pedestrian *>::iterator it_SurroundAllPed = SurroundAllPed.begin();
+    //std::cout<<"size"<<SurroundPed.size()<<std::endl;
+    if(SurroundPed.size()>0){
+        //std::cout<<"4-2"<<std::endl;
+        for(std::vector<Pedestrian *>::iterator it_SurroundAllPed = SurroundAllPed.begin();
         it_SurroundAllPed != SurroundAllPed.end(); ++it_SurroundAllPed){
-        NavLine * navi = (*it_SurroundAllPed)->GetExitLine();
-        if(!SignSensor::NavLine2TransitionID(navi, CurrentSignZone->GetOppositeTransitionID()))
-        {
-            SurroundPed.push_back(*it_SurroundAllPed);
+            //std::cout<<"4-3"<<std::endl;
+            NavLine * navi = (*it_SurroundAllPed)->GetExitLine();
+            if(!SignSensor::NavLine2TransitionID(navi, CurrentSignZone->GetOppositeTransitionID()))
+            {
+                SurroundPed.push_back(*it_SurroundAllPed);
+            }
         }
     }
+    //std::cout<<"4-1"<<std::endl;
     return SurroundPed;
 };
 
@@ -178,7 +184,10 @@ bool SignSensor::NavLine2TransitionID(NavLine * navi, int tranID) const
     std::map<int, Transition *> allTransition = building->GetAllTransitions();
     Transition * tran = building->GetTransition(tranID);
     //std::cout<<"5-1"<<std::endl;
-    if((tran->GetCentre() - navi->GetCentre()).Norm() < 0.15){
+    ////std::cout<<"dis1"<<tran->GetCentre()<<std::endl;
+    ////std::cout<<"dis2"<<navi->GetCentre()<<std::endl;
+    //std::cout<<"final dis"<<(tran->GetCentre() - navi->GetCentre()).Norm()<<std::endl;
+    if((tran->GetCentre() - navi->GetCentre()).Norm() < 0.1){
         //std::cout<<"5-2"<<std::endl;
         return true;
     }else{
@@ -234,21 +243,30 @@ Pedestrian * SignSensor::GetTheNearestNeighbor(const Pedestrian * ped) const
     std::vector<double> distance;
     std::vector<Pedestrian *> SurroundPed = GetSurroundingPeople(ped);
     for(std::vector<Pedestrian *>::iterator it_SurroundPed = SurroundPed.begin(); it_SurroundPed != SurroundPed.end(); ++it_SurroundPed){
+        //std::cout<<"91"<<std::endl;
+        //std::cout<<(ped->GetPos() - (*it_SurroundPed)->GetPos()).Norm()<<std::endl;
         distance.push_back((ped->GetPos() - (*it_SurroundPed)->GetPos()).Norm());
     }
     bool findSameDirectionNearestNeighbor = false;
+    //std::cout<<"92"<<std::endl;
     while (!findSameDirectionNearestNeighbor)
     {
-        int order = std::distance(std::min_element(distance.begin(), distance.end()), distance.begin());
+        //std::cout<<"93"<<std::endl;
+        //int order = std::distance(std::min_element(distance.begin(), distance.end()), distance.begin());
+        int order = std::min_element(distance.begin(), distance.end()) - distance.begin();
+        //std::cout<<order<<std::endl;
+        //std::cout<<SurroundPed.size()<<std::endl;
         Pedestrian * theNearestNeighbor = (*(SurroundPed.begin() + order));
         SignZone * current_sign = GetCurrentSignZone(ped);
-        //std::cout<<"9-3"<<std::endl;
+        //std::cout<<"94"<<std::endl;
+        //std::cout<<theNearestNeighbor->GetExitLine()<<std::endl;
+        //std::cout<<current_sign->GetOppositeTransitionID()<<std::endl;
         if(NavLine2TransitionID(theNearestNeighbor->GetExitLine(), current_sign->GetOppositeTransitionID())){
-            //std::cout<<"9-1"<<std::endl;
+            //std::cout<<"95"<<std::endl;
             distance.erase(distance.begin() + order);
-            //std::cout<<"9-2"<<std::endl;
             continue;
         }else{
+            //std::cout<<"96"<<std::endl;
             findSameDirectionNearestNeighbor = true;
             return theNearestNeighbor;
         }
@@ -260,6 +278,7 @@ Pedestrian * SignSensor::GetTheNearestNeighbor(const Pedestrian * ped) const
 int SignSensor::GetTargetTransitionID(const Pedestrian * ped) const
 {
     //std::cout<<"X"<<std::endl;
+    //std::cout<<ped->GetID()<<std::endl;
     SignZone * current_sign = GetCurrentSignZone(ped);
     std::vector<double> SignPro = current_sign->GetSignPro();    
     int SurroundingNumberRow = GetSurroundingNumberRow(ped);
@@ -268,32 +287,44 @@ int SignSensor::GetTargetTransitionID(const Pedestrian * ped) const
         DetectionColumn = 2;
     }//detected
     RandomNumberGenerator e;
+    //std::cout<<"X-1"<<std::endl;
     double ra_value_follow = e.GetRandomRealBetween0and1();
     int order_pro = SurroundingNumberRow * 3 + DetectionColumn;//Todo: check when add the matrix
     int target_Transition_ID;
     if(SurroundingNumberRow == 0){
+        //std::cout<<"X-2"<<std::endl;
         if(ra_value_follow < SignPro[order_pro]){
             target_Transition_ID = current_sign->GetSignTransitionID();//follow the sign
         }else{
             target_Transition_ID = current_sign->GetBackSignTransitionID();//backwards the sign
         }
     }else{
+        //std::cout<<"X-3"<<std::endl;
         Pedestrian * theNearestNeighbor = GetTheNearestNeighbor(ped);
+        //std::cout<<"X-31"<<std::endl;
         NavLine * navi = theNearestNeighbor->GetExitLine();
+        //std::cout<<"X-32"<<std::endl;
         int PeopleTransitionID;
         int BackPeopleTransitionID;
         if(SignSensor::NavLine2TransitionID(navi, current_sign->GetLeftTransitionID())){
+            //std::cout<<"X-33"<<std::endl;
+            //std::cout<<current_sign->GetLeftTransitionID()<<std::endl;
             PeopleTransitionID = current_sign->GetLeftTransitionID();
             BackPeopleTransitionID = current_sign->GetRightTransitionID();
         }
         if(SignSensor::NavLine2TransitionID(navi, current_sign->GetRightTransitionID())){
+            //std::cout<<"X-34"<<std::endl;
+            //std::cout<<current_sign->GetRightTransitionID()<<std::endl;
             PeopleTransitionID = current_sign->GetRightTransitionID();
             BackPeopleTransitionID = current_sign->GetLeftTransitionID();
         }
         if(ra_value_follow<SignPro[order_pro]){
+            //std::cout<<"X-35"<<std::endl;
             target_Transition_ID = PeopleTransitionID;//follow people
         }else{
+            //std::cout<<"X-36"<<std::endl;
             target_Transition_ID = BackPeopleTransitionID;//backwards people
+            //std::cout<<"X-37"<<std::endl;
         }
     }
     return target_Transition_ID;
@@ -303,19 +334,19 @@ bool SignSensor::FirstEnteringCheck(const Pedestrian * ped) const
 {
     SignZone * currentSignZone = GetCurrentSignZone(ped);
     int oldRoomID = ped->GetOldRoomID();
-    std::cout<<"oldRoomID"<<oldRoomID<<std::endl;
+    //std::cout<<"oldRoomID"<<oldRoomID<<std::endl;
     int oldSubRoomID = ped->GetOldSubRoomID();
-    std::cout<<"oldSubRoomID"<<oldSubRoomID<<std::endl;
+    //std::cout<<"oldSubRoomID"<<oldSubRoomID<<std::endl;
 
-    int RoomID = ped->GetRoomID();
-    std::cout<<"RoomID"<<RoomID<<std::endl;
-    int SubRoomID = ped->GetSubRoomID();
-    std::cout<<"SubRoomID"<<SubRoomID<<std::endl;
+    //int RoomID = ped->GetRoomID();
+    //std::cout<<"RoomID"<<RoomID<<std::endl;
+    //int SubRoomID = ped->GetSubRoomID();
+    //std::cout<<"SubRoomID"<<SubRoomID<<std::endl;
 
     int entering_room = currentSignZone->GetEnteringRoomID();
-    std::cout<<"entering_room"<<entering_room<<std::endl;
+    //std::cout<<"entering_room"<<entering_room<<std::endl;
     int entering_subroom = currentSignZone->GetEnteringSubRoomID();
-    std::cout<<"entering_subroom"<<entering_subroom<<std::endl;
+    //std::cout<<"entering_subroom"<<entering_subroom<<std::endl;
     if(oldRoomID == entering_room && oldSubRoomID == entering_subroom){
         return true;
     }else{
