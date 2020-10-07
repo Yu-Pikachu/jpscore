@@ -135,15 +135,15 @@ void SignZone::SetOthers(){
         SignZone::_BackSignTransitionID = SignZone::_RightTransitionID;
     }
     //define the sign probability
+    //SignPro = {Pd0,Pc10,Pc20,Pd1,Pc11,Pc21,Pd2,Pc12,Pc22}
     if(SignZone::_SignPosition){
-        //SignZone::_SignPro = {1,1,1,1,1,1,1,1,1};//T junction probability
-        SignZone::_SignPro = {0.758, 0.483, 0.385, 0.920, 0.793, 0.850, 0.758, 0.839,0.875};
-        //SignZone::_SignPro = {0, 0.483, 0.385, 0, 0.793, 0.850, 0, 0.839,0.875};
+        //SignZone::_SignPro = {1,1,0.758,1,1,0.758,1,1,0.758};//T junction probability
+        SignZone::_SignPro = {0.758, 0.920, 0.758, 0.483, 0.792, 0.839, 0.385, 0.850, 0.875};//experiment results
+        //SignZone::_SignPro = {0.758, 0.920, 1, 0.483, 0.792, 1, 0.385, 0.850, 1};
     }else{
-        //SignZone::_SignPro = {0.333,0.411,0.571,0.535,0.218,0.422,0.643,0.762,0.885};//room probability, not twinkle, door top
-        //SignZone::_SignPro = {1,1,1,1,1,1,1,1,1};//for test use
-        //SignZone::_SignPro = {0.788, 0.460, 0.333, 0.731, 0.621, 0.941, 0.535, 0.782, 0.578};
-        SignZone::_SignPro = {0.788, 0.731, 0.535, 0.460, 0.621, 0.782, 0.333, 0.941, 0.578};
-        //SignZone::_SignPro = {0, 0.460, 0.333, 0, 0.621, 0.941, 0, 0.782, 0.578};
+        //room probability, not twinkle, door top
+        //SignZone::_SignPro = {1,1,0.535,1,1,0.535,1,1,0.535};
+        SignZone::_SignPro = {0.788, 0.731, 0.535, 0.460, 0.621, 0.782, 0.333, 0.941, 0.578};//experiment results
+        //SignZone::_SignPro = {0.788, 0.731, 1, 0.460, 0.621, 1, 0.333, 0.941, 1};
     }
 }

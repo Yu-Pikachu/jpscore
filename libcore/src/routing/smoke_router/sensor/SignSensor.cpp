@@ -222,11 +222,6 @@ bool SignSensor::DetectionTest(const Pedestrian * ped) const
     SignZone * CurrentSignZone = GetCurrentSignZone(ped);
     int SurroundingNumberRow = GetSurroundingNumberRow(ped);
     std::vector<double> SignPro = CurrentSignZone->GetSignPro();
-    /*SignPro: 3*3 -> 1*9
-    first size: surrounding number; 
-    second size: 0 Detection Probability, 
-                 1 Follow People Probability if not detected, (surrounding number = 0, it is random probability), 
-                 2 Follow People Probability if detected, (surrounding number = 0, it is follow sign probability).*/
     RandomNumberGenerator e;
     double ra_value_detection = e.GetRandomRealBetween0and1();
     if(ra_value_detection < SignPro[SurroundingNumberRow * 3 + 0]){
@@ -242,90 +237,99 @@ Pedestrian * SignSensor::GetTheNearestNeighbor(const Pedestrian * ped) const
     //std::cout<<"9"<<std::endl;
     std::vector<double> distance;
     std::vector<Pedestrian *> SurroundPed = GetSurroundingPeople(ped);
-    for(std::vector<Pedestrian *>::iterator it_SurroundPed = SurroundPed.begin(); it_SurroundPed != SurroundPed.end(); ++it_SurroundPed){
+    if(SurroundPed.size()>0){
+        for(std::vector<Pedestrian *>::iterator it_SurroundPed = SurroundPed.begin(); it_SurroundPed != SurroundPed.end(); ++it_SurroundPed){
         //std::cout<<"91"<<std::endl;
         //std::cout<<(ped->GetPos() - (*it_SurroundPed)->GetPos()).Norm()<<std::endl;
         distance.push_back((ped->GetPos() - (*it_SurroundPed)->GetPos()).Norm());
-    }
-    bool findSameDirectionNearestNeighbor = false;
-    //std::cout<<"92"<<std::endl;
-    while (!findSameDirectionNearestNeighbor)
-    {
-        //std::cout<<"93"<<std::endl;
-        //int order = std::distance(std::min_element(distance.begin(), distance.end()), distance.begin());
-        int order = std::min_element(distance.begin(), distance.end()) - distance.begin();
-        //std::cout<<order<<std::endl;
-        //std::cout<<SurroundPed.size()<<std::endl;
-        Pedestrian * theNearestNeighbor = (*(SurroundPed.begin() + order));
-        SignZone * current_sign = GetCurrentSignZone(ped);
-        //std::cout<<"94"<<std::endl;
-        //std::cout<<theNearestNeighbor->GetExitLine()<<std::endl;
-        //std::cout<<current_sign->GetOppositeTransitionID()<<std::endl;
-        if(NavLine2TransitionID(theNearestNeighbor->GetExitLine(), current_sign->GetOppositeTransitionID())){
-            //std::cout<<"95"<<std::endl;
-            distance.erase(distance.begin() + order);
-            continue;
-        }else{
-            //std::cout<<"96"<<std::endl;
-            findSameDirectionNearestNeighbor = true;
-            return theNearestNeighbor;
+        }
+        bool findSameDirectionNearestNeighbor = false;//avoid find the person himself
+        //std::cout<<"92"<<std::endl;
+        while (!findSameDirectionNearestNeighbor)
+        {
+            //std::cout<<"93"<<std::endl;
+            int order = std::min_element(distance.begin(), distance.end()) - distance.begin();
+            //std::cout<<order<<"order"<<std::endl;
+            //std::cout<<SurroundPed.size()<<"S_size"<<std::endl;
+            Pedestrian * theNearestNeighbor = (*(SurroundPed.begin() + order));
+            SignZone * current_sign = GetCurrentSignZone(ped);
+            //std::cout<<"94"<<std::endl;
+            //std::cout<<theNearestNeighbor->GetExitLine()<<std::endl;
+            //std::cout<<current_sign->GetOppositeTransitionID()<<std::endl;
+            if(NavLine2TransitionID(theNearestNeighbor->GetExitLine(), current_sign->GetOppositeTransitionID())){
+                //std::cout<<"95"<<std::endl;
+                distance.erase(distance.begin() + order);
+                continue;
+            }else{
+                //std::cout<<"96"<<std::endl;
+                findSameDirectionNearestNeighbor = true;
+                return theNearestNeighbor;
+            }
         }
     }
+    //std::cout<<"97"<<std::endl;
     return 0;
 }
 
 //get the sign guidance target Transition
 int SignSensor::GetTargetTransitionID(const Pedestrian * ped) const
 {
-    //std::cout<<"X"<<std::endl;
-    //std::cout<<ped->GetID()<<std::endl;
+    //std::cout<<"find direction"<<std::endl;
     SignZone * current_sign = GetCurrentSignZone(ped);
-    std::vector<double> SignPro = current_sign->GetSignPro();    
+    std::vector<double> SignPro = current_sign->GetSignPro();
     int SurroundingNumberRow = GetSurroundingNumberRow(ped);
-    int DetectionColumn = 1;//not detected
+    int DetectionColumn = 2;//not detected
     if(DetectionTest(ped)){
-        DetectionColumn = 2;
+        DetectionColumn = 1;
     }//detected
     RandomNumberGenerator e;
-    //std::cout<<"X-1"<<std::endl;
     double ra_value_follow = e.GetRandomRealBetween0and1();
-    int order_pro = SurroundingNumberRow * 3 + DetectionColumn;//Todo: check when add the matrix
+    int order_pro = SurroundingNumberRow * 3 + DetectionColumn;
     int target_Transition_ID;
-    if(SurroundingNumberRow == 0){
-        //std::cout<<"X-2"<<std::endl;
+    //std::cout<<"f1"<<std::endl;
+    if(DetectionColumn == 1){
+        //std::cout<<"f2"<<std::endl;
         if(ra_value_follow < SignPro[order_pro]){
             target_Transition_ID = current_sign->GetSignTransitionID();//follow the sign
         }else{
             target_Transition_ID = current_sign->GetBackSignTransitionID();//backwards the sign
         }
     }else{
-        //std::cout<<"X-3"<<std::endl;
-        Pedestrian * theNearestNeighbor = GetTheNearestNeighbor(ped);
-        //std::cout<<"X-31"<<std::endl;
-        NavLine * navi = theNearestNeighbor->GetExitLine();
-        //std::cout<<"X-32"<<std::endl;
-        int PeopleTransitionID;
-        int BackPeopleTransitionID;
-        if(SignSensor::NavLine2TransitionID(navi, current_sign->GetLeftTransitionID())){
-            //std::cout<<"X-33"<<std::endl;
-            //std::cout<<current_sign->GetLeftTransitionID()<<std::endl;
-            PeopleTransitionID = current_sign->GetLeftTransitionID();
-            BackPeopleTransitionID = current_sign->GetRightTransitionID();
+        if(SurroundingNumberRow == 0){//no surrounding people,choose right randomly
+            if(ra_value_follow<SignPro[order_pro]){
+                target_Transition_ID = current_sign->GetRightTransitionID();
+            }else{
+                target_Transition_ID = current_sign->GetLeftTransitionID();
+            }
+        }else{//with surrounding people, follow people
+            //std::cout<<"f3"<<std::endl;
+            Pedestrian * theNearestNeighbor = GetTheNearestNeighbor(ped);
+            //std::cout<<"f4"<<std::endl;
+            NavLine * navi = theNearestNeighbor->GetExitLine();
+            //std::cout<<"f5"<<std::endl;
+            int PeopleTransitionID;
+            int BackPeopleTransitionID;
+            if(SignSensor::NavLine2TransitionID(navi, current_sign->GetLeftTransitionID())){
+                PeopleTransitionID = current_sign->GetLeftTransitionID();
+                BackPeopleTransitionID = current_sign->GetRightTransitionID();
+            }
+            if(SignSensor::NavLine2TransitionID(navi, current_sign->GetRightTransitionID())){
+                PeopleTransitionID = current_sign->GetRightTransitionID();
+                BackPeopleTransitionID = current_sign->GetLeftTransitionID();
+            }
+            if(ra_value_follow<SignPro[order_pro]){
+                //std::cout<<"X-35"<<std::endl;
+                target_Transition_ID = PeopleTransitionID;//follow people
+            }else{
+                //std::cout<<"X-36"<<std::endl;
+                target_Transition_ID = BackPeopleTransitionID;//backwards people
+                //std::cout<<"X-37"<<std::endl;
+            }
         }
-        if(SignSensor::NavLine2TransitionID(navi, current_sign->GetRightTransitionID())){
-            //std::cout<<"X-34"<<std::endl;
-            //std::cout<<current_sign->GetRightTransitionID()<<std::endl;
-            PeopleTransitionID = current_sign->GetRightTransitionID();
-            BackPeopleTransitionID = current_sign->GetLeftTransitionID();
-        }
-        if(ra_value_follow<SignPro[order_pro]){
-            //std::cout<<"X-35"<<std::endl;
-            target_Transition_ID = PeopleTransitionID;//follow people
-        }else{
-            //std::cout<<"X-36"<<std::endl;
-            target_Transition_ID = BackPeopleTransitionID;//backwards people
-            //std::cout<<"X-37"<<std::endl;
-        }
+
+
+
+        
     }
     return target_Transition_ID;
 };
@@ -337,11 +341,6 @@ bool SignSensor::FirstEnteringCheck(const Pedestrian * ped) const
     //std::cout<<"oldRoomID"<<oldRoomID<<std::endl;
     int oldSubRoomID = ped->GetOldSubRoomID();
     //std::cout<<"oldSubRoomID"<<oldSubRoomID<<std::endl;
-
-    //int RoomID = ped->GetRoomID();
-    //std::cout<<"RoomID"<<RoomID<<std::endl;
-    //int SubRoomID = ped->GetSubRoomID();
-    //std::cout<<"SubRoomID"<<SubRoomID<<std::endl;
 
     int entering_room = currentSignZone->GetEnteringRoomID();
     //std::cout<<"entering_room"<<entering_room<<std::endl;
