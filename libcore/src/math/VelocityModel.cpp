@@ -132,7 +132,6 @@ void VelocityModel::ComputeNextTimeStep(
     pedsToRemove.reserve(500);
     unsigned long nSize;
     nSize = allPeds.size();
-
     int nThreads = omp_get_max_threads();
 
     int partSize;
@@ -150,7 +149,6 @@ void VelocityModel::ComputeNextTimeStep(
         spacings.reserve(nSize);             // larger than needed
         spacings.push_back(my_pair(100, 1)); // in case there are no neighbors
         const int threadID = omp_get_thread_num();
-
         int start = threadID * partSize;
         int end;
         end = (threadID < nThreads - 1) ? (threadID + 1) * partSize - 1 : (int) (nSize - 1);
@@ -161,7 +159,6 @@ void VelocityModel::ComputeNextTimeStep(
             Point repPed      = Point(0, 0);
             std::vector<Pedestrian *> neighbours;
             building->GetGrid()->GetNeighbourhood(ped, neighbours);
-
             int size = (int) neighbours.size();
             for(int i = 0; i < size; i++) {
                 Pedestrian * ped1 = neighbours[i];
@@ -193,7 +190,6 @@ void VelocityModel::ComputeNextTimeStep(
             } // for i
             //repulsive forces to walls and closed transitions that are not my target
             Point repWall = ForceRepRoom(allPeds[p], subroom);
-
             // calculate new direction ei according to (6)
             Point direction = e0(ped, room) + repPed + repWall;
             for(int i = 0; i < size; i++) {
@@ -216,7 +212,8 @@ void VelocityModel::ComputeNextTimeStep(
 
             // calculate min spacing
             std::sort(spacings.begin(), spacings.end(), sort_pred());
-            double spacing = spacings[0].first;
+            //double spacing = spacings[0].first;
+            double spacing = spacings.size() == 0 ? 100 : spacings[0].first;
             //============================================================
             // TODO: Hack for Head on situations: ped1 x ------> | <------- x ped2
             if(0 && direction.NormSquare() < 0.5) {
@@ -235,7 +232,6 @@ void VelocityModel::ComputeNextTimeStep(
             //============================================================
             Point speed = direction.Normalized() * OptimalSpeed(ped, spacing);
             result_acc.push_back(speed);
-
 
             spacings.clear(); //clear for ped p
 
@@ -260,12 +256,10 @@ void VelocityModel::ComputeNextTimeStep(
             }
 
         } // for p
-
 #pragma omp barrier
         // update
         for(int p = start; p <= end; ++p) {
             Pedestrian * ped = allPeds[p];
-
             Point v_neu   = result_acc[p - start];
             Point pos_neu = ped->GetPos() + v_neu * deltaT;
 
@@ -289,7 +283,6 @@ void VelocityModel::ComputeNextTimeStep(
             ped->SetV(v_neu);
         }
     } //end parallel
-
     // remove the pedestrians that have left the building
     for(unsigned int p = 0; p < pedsToRemove.size(); p++) {
         building->DeletePedestrian(pedsToRemove[p]);

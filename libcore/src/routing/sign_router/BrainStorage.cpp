@@ -70,7 +70,7 @@ BStorageValueType BrainStorage::operator[](BStorageKeyType key)
     return _brains[key];
 }
 
-void BrainStorage::ParseCogMap(BStorageKeyType ped)
+void BrainStorage::ParseCogMap(BStorageKeyType ped)//用来定义region，没有给定的cognitive map文件就用不到这个parse函数
 {
     _regions.clear();
 
@@ -285,7 +285,7 @@ void BrainStorage::CreateBrain(BStorageKeyType ped)
 
         //Add transitions as edges
         for(auto && itr_trans : _building->GetAllTransitions()) {
-            if(itr_trans.second->IsOpen()) {
+            if(itr_trans.second->IsOpen()) {  
                 if(itr_trans.second->IsExit()) {
                     _brains[ped]->GetCognitiveMap().GetGraphNetwork()->AddExit(itr_trans.second);
                 } else {

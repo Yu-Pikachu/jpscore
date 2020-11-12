@@ -29,7 +29,7 @@
 #include "GraphEdge.h"
 #include "geometry/SubRoom.h"
 #include "geometry/Transition.h"
-#include "routing/smoke_router/NavigationGraph.h"
+#include "routing/sign_router/NavigationGraph.h"
 
 #include <queue>
 
@@ -240,28 +240,14 @@ const GraphEdge * GraphVertex::GetLocalCheapestDestination(const Point & positio
         if((*it)->GetCrossing()->IsExit())
             exitEdges.push(std::make_pair((*it)->GetWeight(position), (*it)));
         edges.push(std::make_pair((*it)->GetFactor(), (*it)));
+        //std::cout<<"weight "<<((*it)->GetFactor())<<" edge "<<((*it)->GetCrossing()->GetID())<<std::endl;
     }
 
     // if exit(s) are available
-    if(exitEdges.size() == 1)
+    if(exitEdges.size() == 1){
+        //std::cout<<exitEdges.top().first<<std::endl;
         return exitEdges.top().second;
-
-    //    else if (exitEdges.size()>1)
-    //    {
-    //        /*
-    //        // if two edges possess the same (lowest) weight
-    //        for(EdgesContainer::const_iterator itedge = this->GetAllOutEdges()->begin(); itedge != this->GetAllOutEdges()->end(); ++itedge)
-    //        {
-    //            if ((*itedge)->GetCrossing()->IsExit())
-    //            {
-
-    //                sameFactorEdges.push(std::make_pair((*itedge)->GetWeight(position),(*itedge)));
-    //            }
-    //            //else if ((*itedge)->GetFactor()==edges.top().second->GetFactor())
-    //             //   sameFactorEdges.push(std::make_pair((*itedge)->GetApproximateDistance(position),(*itedge)));
-    //        }*/
-    //    }
-    else if(exitEdges.empty()) {
+    }else if(exitEdges.empty()) {
         // if two edges possess the same (lowest) weight
         for(EdgesContainer::const_iterator itedge = this->GetAllOutEdges()->begin();
             itedge != this->GetAllOutEdges()->end();
@@ -269,41 +255,13 @@ const GraphEdge * GraphVertex::GetLocalCheapestDestination(const Point & positio
             if((*itedge)->GetFactor() == edges.top().second->GetFactor())
                 sameFactorEdges.push(
                     std::make_pair((*itedge)->GetApproximateDistance(position), (*itedge)));
-            //else if ((*itedge)->GetFactor()==edges.top().second->GetFactor())
-            //   sameFactorEdges.push(std::make_pair((*itedge)->GetApproximateDistance(position),(*itedge)));
         }
     }
-
-    if(sameFactorEdges.size() >= 1)
+    if(sameFactorEdges.size() >= 1){
+        //std::cout<<sameFactorEdges.top().first<<" edge "<<sameFactorEdges.top().second->GetCrossing()->GetID()<<std::endl;
         return sameFactorEdges.top().second;
-    else
+    }else{
+        //std::cout<<exitEdges.top().first<<" edge "<<sameFactorEdges.top().second->GetCrossing()->GetID()<<std::endl;
         return edges.top().second;
-
-
-    //    if(edges.size() > 1) {
-    //        double best_factor = edges.top().first;
-    //        const GraphEdge * act_edge = nullptr;
-    //        //take the best  edges and choose the nearest
-    //        while(!edges.empty()) {
-
-    //            //Log->Write("Best factor: %f ; act edge factor: %f", best_factor, edges.top().first);
-
-    //            //if the factor is worse than maximum_factor_distance times the best_factor the edges are rejected
-    //            if(edges.top().first > maximum_factor_distance * best_factor) break;
-
-    //            if(act_edge == nullptr || act_edge->GetWeight(position) > edges.top().second->GetWeight(position)) {
-    //                act_edge = edges.top().second;
-    //            }
-    //            else if(act_edge->GetWeight(position) == edges.top().second->GetWeight(position))
-    //            {
-    //                if(act_edge->GetApproximateDistance(position) > edges.top().second->GetApproximateDistance(position))
-    //                    act_edge = edges.top().second;
-    //            }
-    //            edges.pop();
-    //        }
-
-    //        return act_edge;
-    //    }
-
-    //}
+    }
 }

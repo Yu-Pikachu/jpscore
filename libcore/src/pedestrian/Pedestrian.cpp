@@ -511,6 +511,12 @@ const std::vector<int> & Pedestrian::GetLastDestinations() const
     return _destHistory;
 }
 
+void Pedestrian::AddLastDestination(int tran_id)
+{
+    _destHistory.push_back(tran_id);
+}
+
+
 const std::string Pedestrian::GetKnowledgeAsString() const
 {
     std::string key = "";
@@ -1008,6 +1014,7 @@ int Pedestrian::FindRoute()
         LOG_ERROR("One or more routers does not exist! Check your router_ids");
         return -1;
     }
+    //std::cout<<"FindRoute"<<std::endl;
     return _router->FindExit(this);
 }
 
@@ -1164,6 +1171,7 @@ int Pedestrian::GetColor() const
 bool Pedestrian::Relocate(std::function<void(const Pedestrian &)> flowupdater)
 {
     auto allRooms = _building->GetAllRooms();
+    //std::cout<<"relocate-1"<<std::endl;
     bool status   = false;
     for(auto & it_room : allRooms) {
         auto & room                                           = it_room.second;
@@ -1172,12 +1180,13 @@ bool Pedestrian::Relocate(std::function<void(const Pedestrian &)> flowupdater)
             subrooms.begin(),
             subrooms.end(),
             [&](std::pair<int, std::shared_ptr<SubRoom>> iterator) {
-                return (
-                    (iterator.second->IsDirectlyConnectedWith(
+                return ((iterator.second->IsDirectlyConnectedWith(
                         allRooms[_roomID]->GetSubRoom(_subRoomID))) &&
                     iterator.second->IsInSubRoom(this));
-            });
+            });       
+
         if(sub != subrooms.end()) {
+            //std::cout<<"sub_found"<<std::endl;
             flowupdater(
                 *this); //@todo: ar.graf : this call should move into a critical region? check plz
             ClearMentalMap(); // reset the destination
@@ -1187,10 +1196,11 @@ bool Pedestrian::Relocate(std::function<void(const Pedestrian &)> flowupdater)
             SetRoomID(room->GetID(), room->GetCaption());
             SetSubRoomID(sub->second->GetSubRoomID());
             SetSubRoomUID(sub->second->GetUID());
+            //std::cout<<"Exit"<<std::endl;
             _router->FindExit(this);
             _signRecord = true;
             if(oldRoomID != room->GetID()) {
-                _signRecord = false;//Yu changed 02.06.2020
+                //_signRecord = false;//Yu changed 02.06.2020
                 //the agent left the old room
                 //actualize the egress time for that room
 #pragma omp critical(SetEgressTime)
@@ -1201,6 +1211,7 @@ bool Pedestrian::Relocate(std::function<void(const Pedestrian &)> flowupdater)
             break;
         }
     }
+    //std::cout<<"relocate-2"<<std::endl;
     return status;
 }
 

@@ -1,7 +1,7 @@
 #include "locater.h"
 
 #include "pedestrian/Pedestrian.h"
-#include "routing/smoke_router/cognitiveMap/cognitivemap.h"
+#include "routing/sign_router/cognitiveMap/cognitivemap.h"
 
 Locater::Locater(const Building * b, const double & updateInterval) : AbstractSensor(b)
 {

@@ -18,7 +18,7 @@ public:
     Pedestrian * GetTheNearestNeighbor(const Pedestrian *) const;
     int GetTargetTransitionID(const Pedestrian *) const;
     bool FirstEnteringCheck(const Pedestrian *) const;
-    void RandomPassT(const Pedestrian * ped, CognitiveMap & cognitive_map) const;
+    void RandomPass(const Pedestrian * ped, CognitiveMap & cognitive_map) const;
 
 private:
 };

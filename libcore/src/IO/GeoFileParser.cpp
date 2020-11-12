@@ -349,6 +349,7 @@ bool GeoFileParser::LoadRoutingInfo(Building * building)
             if(goal) {
                 building->AddGoal(goal);
                 _configuration->GetRoutingEngine()->AddFinalDestinationID(goal->GetId());
+                std::cout<<"get goals"<<std::endl;//it should NOT appear in my simulation.
             }
         }
 

@@ -34,7 +34,7 @@
 #include "RoomToFloorSensor.h"
 #include "geometry/Building.h"
 #include "locater.h"
-#include "routing/smoke_router/BrainStorage.h"
+#include "routing/sign_router/BrainStorage.h"
 #include "SignSensor.h"//Yu changed 25.03.2020
 
 SensorManager::SensorManager(const Building * /*b*/, BrainStorage * cms) :
@@ -73,7 +73,7 @@ SensorManager * SensorManager::InitWithAllSensors(const Building * b, BrainStora
     sensor_manager->Register(new JamSensor(b), PERIODIC | NO_WAY | CHANGED_ROOM);
     sensor_manager->Register(new Locater(b, sensor_manager->GetIntVPeriodicUpdate()), PERIODIC);
 
-    sensor_manager->Register(new SignSensor(b), INIT | PERIODIC | NO_WAY | CHANGED_ROOM);//Yu changed 25.03.2020
+    sensor_manager->Register(new SignSensor(b), SIGN);//Yu changed 25.03.2020
 
     return sensor_manager;
 }
@@ -102,7 +102,7 @@ SensorManager * SensorManager::InitWithCertainSensors(
             //double finalt = std::stod(optSto.at("smokeOptions").at(2));
             sensor_manager->Register(new SmokeSensor(b), INIT | PERIODIC | NO_WAY | CHANGED_ROOM);
         }else if(it == "Sign") {
-            sensor_manager->Register(new SignSensor(b), NO_WAY);
+            sensor_manager->Register(new SignSensor(b), SIGN);
         }//Yu changed 26.03.2020
     }
 

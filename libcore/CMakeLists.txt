@@ -68,30 +68,30 @@ set(source_files
     src/routing/quickest/QuickestPathRouter.cpp
     src/routing/Router.cpp
     src/routing/RoutingEngine.cpp
-    src/routing/smoke_router/Brain.cpp
-    src/routing/smoke_router/BrainStorage.cpp
-    src/routing/smoke_router/cognitiveMap/associations.cpp
-    src/routing/smoke_router/cognitiveMap/cogmapoutputhandler.cpp
-    src/routing/smoke_router/cognitiveMap/cognitivemap.cpp
-    src/routing/smoke_router/cognitiveMap/connection.cpp
-    src/routing/smoke_router/cognitiveMap/internnavigationnetwork.cpp
-    src/routing/smoke_router/cognitiveMap/landmark.cpp
-    src/routing/smoke_router/cognitiveMap/landmarknetwork.cpp
-    src/routing/smoke_router/cognitiveMap/region.cpp
-    src/routing/smoke_router/cognitiveMap/youareherepointer.cpp
-    src/routing/smoke_router/GraphNetwork.cpp
-    src/routing/smoke_router/navigation_graph/GraphEdge.cpp
-    src/routing/smoke_router/navigation_graph/GraphVertex.cpp
-    src/routing/smoke_router/NavigationGraph.cpp
-    src/routing/smoke_router/sensor/AbstractSensor.cpp
-    src/routing/smoke_router/sensor/DiscoverDoorsSensor.cpp
-    src/routing/smoke_router/sensor/JamSensor.cpp
-    src/routing/smoke_router/sensor/LastDestinationsSensor.cpp
-    src/routing/smoke_router/sensor/locater.cpp
-    src/routing/smoke_router/sensor/RoomToFloorSensor.cpp
-    src/routing/smoke_router/sensor/SensorManager.cpp
-    src/routing/smoke_router/sensor/SignSensor.cpp
-    src/routing/smoke_router/SmokeRouter.cpp
+    src/routing/sign_router/Brain.cpp
+    src/routing/sign_router/BrainStorage.cpp
+    src/routing/sign_router/cognitiveMap/associations.cpp
+    src/routing/sign_router/cognitiveMap/cogmapoutputhandler.cpp
+    src/routing/sign_router/cognitiveMap/cognitivemap.cpp
+    src/routing/sign_router/cognitiveMap/connection.cpp
+    src/routing/sign_router/cognitiveMap/internnavigationnetwork.cpp
+    src/routing/sign_router/cognitiveMap/landmark.cpp
+    src/routing/sign_router/cognitiveMap/landmarknetwork.cpp
+    src/routing/sign_router/cognitiveMap/region.cpp
+    src/routing/sign_router/cognitiveMap/youareherepointer.cpp
+    src/routing/sign_router/GraphNetwork.cpp
+    src/routing/sign_router/navigation_graph/GraphEdge.cpp
+    src/routing/sign_router/navigation_graph/GraphVertex.cpp
+    src/routing/sign_router/NavigationGraph.cpp
+    src/routing/sign_router/sensor/AbstractSensor.cpp
+    src/routing/sign_router/sensor/DiscoverDoorsSensor.cpp
+    src/routing/sign_router/sensor/JamSensor.cpp
+    src/routing/sign_router/sensor/LastDestinationsSensor.cpp
+    src/routing/sign_router/sensor/locater.cpp
+    src/routing/sign_router/sensor/RoomToFloorSensor.cpp
+    src/routing/sign_router/sensor/SensorManager.cpp
+    src/routing/sign_router/sensor/SignSensor.cpp
+    src/routing/sign_router/SignRouter.cpp
     src/Simulation.cpp
     src/voronoi-boost/VoronoiPositionGenerator.cpp
 )
@@ -156,29 +156,29 @@ set(header_files
     src/routing/quickest/QuickestPathRouter.h
     src/routing/Router.h
     src/routing/RoutingEngine.h
-    src/routing/smoke_router/Brain.h
-    src/routing/smoke_router/BrainStorage.h
-    src/routing/smoke_router/cognitiveMap/associations.h
-    src/routing/smoke_router/cognitiveMap/cogmapoutputhandler.h
-    src/routing/smoke_router/cognitiveMap/cognitivemap.h
-    src/routing/smoke_router/cognitiveMap/connection.cpp
-    src/routing/smoke_router/cognitiveMap/internnavigationnetwork.h
-    src/routing/smoke_router/cognitiveMap/landmark.h
-    src/routing/smoke_router/cognitiveMap/landmarknetwork.h
-    src/routing/smoke_router/cognitiveMap/region.h
-    src/routing/smoke_router/cognitiveMap/youareherepointer.h
-    src/routing/smoke_router/GraphNetwork.h
-    src/routing/smoke_router/navigation_graph/GraphEdge.h
-    src/routing/smoke_router/navigation_graph/GraphVertex.h
-    src/routing/smoke_router/NavigationGraph.h
-    src/routing/smoke_router/sensor/AbstractSensor.h
-    src/routing/smoke_router/sensor/DiscoverDoorsSensor.h
-    src/routing/smoke_router/sensor/JamSensor.h
-    src/routing/smoke_router/sensor/LastDestinationsSensor.h
-    src/routing/smoke_router/sensor/locater.h
-    src/routing/smoke_router/sensor/RoomToFloorSensor.h
-    src/routing/smoke_router/sensor/SensorManager.h
-    src/routing/smoke_router/SmokeRouter.h
+    src/routing/sign_router/Brain.h
+    src/routing/sign_router/BrainStorage.h
+    src/routing/sign_router/cognitiveMap/associations.h
+    src/routing/sign_router/cognitiveMap/cogmapoutputhandler.h
+    src/routing/sign_router/cognitiveMap/cognitivemap.h
+    src/routing/sign_router/cognitiveMap/connection.cpp
+    src/routing/sign_router/cognitiveMap/internnavigationnetwork.h
+    src/routing/sign_router/cognitiveMap/landmark.h
+    src/routing/sign_router/cognitiveMap/landmarknetwork.h
+    src/routing/sign_router/cognitiveMap/region.h
+    src/routing/sign_router/cognitiveMap/youareherepointer.h
+    src/routing/sign_router/GraphNetwork.h
+    src/routing/sign_router/navigation_graph/GraphEdge.h
+    src/routing/sign_router/navigation_graph/GraphVertex.h
+    src/routing/sign_router/NavigationGraph.h
+    src/routing/sign_router/sensor/AbstractSensor.h
+    src/routing/sign_router/sensor/DiscoverDoorsSensor.h
+    src/routing/sign_router/sensor/JamSensor.h
+    src/routing/sign_router/sensor/LastDestinationsSensor.h
+    src/routing/sign_router/sensor/locater.h
+    src/routing/sign_router/sensor/RoomToFloorSensor.h
+    src/routing/sign_router/sensor/SensorManager.h
+    src/routing/sign_router/SignRouter.h
     src/voronoi-boost/VoronoiPositionGenerator.h
 )
 

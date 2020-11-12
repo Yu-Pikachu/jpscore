@@ -35,7 +35,7 @@
 #include "routing/ff_router/ffRouter.h"
 #include "routing/global_shortest/GlobalRouter.h"
 #include "routing/quickest/QuickestPathRouter.h"
-#include "routing/smoke_router/SmokeRouter.h"
+#include "routing/sign_router/SignRouter.h"
 
 #include <stdexcept>
 #include <string>
@@ -809,10 +809,10 @@ bool IniFileParser::ParseRoutingStrategies(TiXmlNode * routingNode, TiXmlNode * 
         } else if(
             (strategy == "smoke") &&
             (std::find(usedRouter.begin(), usedRouter.end(), id) != usedRouter.end())) {
-            Router * r = new SmokeRouter(id, ROUTING_SMOKE);
+            Router * r = new SignRouter(id, ROUTING_SMOKE);
             _config->GetRoutingEngine()->AddRouter(r);
 
-            LOG_INFO("Using SmokeRouter");
+            LOG_INFO("Using SignRouter");
             ///Parsing additional options
             if(!ParseCogMapOpts(e))
                 return false;
@@ -885,9 +885,9 @@ bool IniFileParser::ParseCogMapOpts(TiXmlNode * routingNode)
         return false;
     }
 
-    /// static_cast to get access to the method 'addOption' of the SmokeRouter
-    SmokeRouter * r =
-        static_cast<SmokeRouter *>(_config->GetRoutingEngine()->GetAvailableRouters().back());
+    /// static_cast to get access to the method 'addOption' of the SignRouter
+    SignRouter * r =
+        static_cast<SignRouter *>(_config->GetRoutingEngine()->GetAvailableRouters().back());
 
     std::vector<std::string> sensorVec;
     for(TiXmlElement * e = sensorNode->FirstChildElement("sensor"); e;

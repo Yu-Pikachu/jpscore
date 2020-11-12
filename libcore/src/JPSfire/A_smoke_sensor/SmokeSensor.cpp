@@ -34,8 +34,8 @@
 #include "geometry/Building.h"
 #include "geometry/SubRoom.h"
 #include "pedestrian/Pedestrian.h"
-#include "routing/smoke_router/NavigationGraph.h"
-#include "routing/smoke_router/cognitiveMap/cognitivemap.h"
+#include "routing/sign_router/NavigationGraph.h"
+#include "routing/sign_router/cognitiveMap/cognitivemap.h"
 
 #include <tinyxml.h>
 

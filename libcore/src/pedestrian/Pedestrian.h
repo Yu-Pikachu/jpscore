@@ -262,6 +262,8 @@ public:
       */
     const std::vector<int> & GetLastDestinations() const;
 
+    void AddLastDestination(int tran_id);
+
     /**
       * For convenience
       * @return a string representation of the knowledge

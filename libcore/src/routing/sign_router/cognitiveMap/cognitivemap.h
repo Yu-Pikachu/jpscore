@@ -7,7 +7,7 @@
 #include "associations.h"
 #include "cogmapoutputhandler.h"
 #include "region.h"
-#include "routing/smoke_router/GraphNetwork.h"
+#include "routing/sign_router/GraphNetwork.h"
 #include "youareherepointer.h"
 
 #include <memory>

@@ -27,7 +27,7 @@
 #include "pedestrian/AgentsParameters.h"
 #include "routing/global_shortest/GlobalRouter.h"
 #include "routing/quickest/QuickestPathRouter.h"
-#include "routing/smoke_router/SmokeRouter.h"
+#include "routing/sign_router/SignRouter.h"
 
 
 const fs::path & ArgumentParser::IniFilePath() const

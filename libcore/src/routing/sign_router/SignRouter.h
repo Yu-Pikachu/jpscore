@@ -1,5 +1,5 @@
 /**
- * \file        SmokeRouter.h
+ * \file        SignRouter.h
  * \date        Feb 1, 2014
  * \version     v0.7
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
@@ -47,12 +47,12 @@ using optStorage = std::unordered_map<std::string, std::vector<std::string>>;
  *\ingroup Router
  *
  */
-class SmokeRouter : public Router
+class SignRouter : public Router
 {
 public:
-    SmokeRouter();
-    SmokeRouter(int id, RoutingStrategy s);
-    virtual ~SmokeRouter();
+    SignRouter();
+    SignRouter(int id, RoutingStrategy s);
+    virtual ~SignRouter();
 
 
     virtual int FindExit(Pedestrian * p);

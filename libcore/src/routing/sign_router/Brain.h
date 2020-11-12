@@ -1,7 +1,7 @@
 #pragma once
 
-#include "routing/smoke_router/cognitiveMap/cognitivemap.h"
-#include "routing/smoke_router/cognitiveMap/internnavigationnetwork.h"
+#include "routing/sign_router/cognitiveMap/cognitivemap.h"
+#include "routing/sign_router/cognitiveMap/internnavigationnetwork.h"
 
 using ptrIntNetwork = std::shared_ptr<InternNavigationNetwork>;
 

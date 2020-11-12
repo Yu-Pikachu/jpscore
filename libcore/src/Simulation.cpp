@@ -246,13 +246,14 @@ void Simulation::UpdateRoutesAndLocations()
         // reposition in the case the pedestrians "accidentally left the room" not via the intended exit.
         // That may happen if the forces are too high for instance
         // the ped is removed from the simulation, if it could not be reassigned
+            
         else if(!sub0->IsInSubRoom(ped)) {
             bool assigned = false;
             std::function<void(const Pedestrian &)> f =
                 std::bind(&Simulation::UpdateFlowAtDoors, this, std::placeholders::_1);
             //std::cout<<"relocate"<<std::endl;
             assigned = ped->Relocate(f);
-            //std::cout<<"relocate_end"<<std::endl;
+            //std::cout<<"relocate_end"<<assigned<<std::endl;
             //this will delete agents, that are pushed outside (maybe even if inside obstacles??)
 
             if(!assigned) {
@@ -274,56 +275,9 @@ void Simulation::UpdateRoutesAndLocations()
                 ped->EndWaiting();
             }
         }
-
-        // actualize routes for sources
-        if(_gotSources)
-            target = ped->FindRoute();
-        //finally actualize the route
-        if(!_gotSources && ped->FindRoute() == -1 && !_trainConstraints && !ped->IsWaiting()) {
-            //a destination could not be found for that pedestrian
-            LOG_ERROR(
-                "Could not find a route for pedestrian {} in room {} and subroom {}",
-                ped->GetID(),
-                ped->GetRoomID(),
-                ped->GetSubRoomID());
-            std::function<void(const Pedestrian &)> f =
-                std::bind(&Simulation::UpdateFlowAtDoors, this, std::placeholders::_1);
-            ped->Relocate(f);
-#pragma omp critical(Simulation_Update_pedsToRemove)
-            {
-                pedsToRemove.insert(ped);
-                // TODO KKZ track deleted peds
-            }
-        }
-
-        // Set pedestrian waiting when find route temp_close
-        int goal = ped->FindRoute();
-        if(goal != FINAL_DEST_OUT) {
-            const Hline * target = _building->GetTransOrCrossByUID(goal);
-            int roomID           = ped->GetRoomID();
-            int subRoomID        = ped->GetSubRoomID();
-
-            if(auto cross = dynamic_cast<const Crossing *>(target)) {
-                if(cross->IsInRoom(roomID) && cross->IsInSubRoom(subRoomID)) {
-                    if(!ped->IsWaiting() && cross->IsTempClose()) {
-                        ped->StartWaiting();
-                    }
-
-                    if(ped->IsWaiting() && cross->IsOpen() && !ped->IsInsideWaitingAreaWaiting()) {
-                        ped->EndWaiting();
-                    }
-                }
-            }
-        }
+        _goalManager.ProcessPedPosition(ped);     
         */
-        // Get new goal for pedestrians who are inside waiting area and wait time is over
-        // Check if current position is already waiting area
-        // yes: set next goal and return findExit(p)
-        _goalManager.ProcessPedPosition(ped);
     }
-
-
-    _goalManager.ProcessWaitingAreas(Pedestrian::GetGlobalTime());
 
 #ifdef _USE_PROTOCOL_BUFFER
     if(_hybridSimManager) {
@@ -468,21 +422,16 @@ double Simulation::RunBody(double maxSimTime)
         t = 0 + (frameNr - 1) * _deltaT;
         // Handle train traffic: coorect geometry
         bool geometryChanged = TrainTraffic();
-
         //process the queue for incoming pedestrians
         ProcessAgentsQueue();
-
         if(t > Pedestrian::GetMinPremovementTime()) {
             //update the linked cells
             _building->UpdateGrid();
-
             // update the positions
             _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get(), _periodic);
-
             //update the events
             bool eventProcessed = _em->ProcessEvent();
             _building->GetRoutingEngine()->setNeedUpdate(eventProcessed);
-
             //here we could place router-tasks (calc new maps) that can use multiple cores AND we have 't'
             //update quickestRouter
             if(geometryChanged) {
@@ -490,9 +439,7 @@ double Simulation::RunBody(double maxSimTime)
                 fs::path new_filename("tmp_" + std::to_string(t) + "_");
                 new_filename += _config->GetGeometryFile().filename();
                 fs::path changedGeometryFile = _config->GetGeometryFile();
-
                 changedGeometryFile.replace_filename(new_filename);
-
                 LOG_INFO("Update geometry. New  geometry --> {}", changedGeometryFile.string());
 
                 LOG_INFO(
@@ -511,16 +458,13 @@ double Simulation::RunBody(double maxSimTime)
                         ffrouter->SetRecalc(t);
                     }
             }
-
             // here the used routers are update, when needed due to external changes
             if(_routingEngine->NeedsUpdate()) {
                 LOG_INFO("Update router during simulation.");
                 _routingEngine->UpdateRouter();
             }
-
             //update the routes and locations
             UpdateRoutesAndLocations();
-
             //other updates
             //someone might have left the building
             _nPeds = _building->GetAllPedestrians().size();
@@ -528,13 +472,11 @@ double Simulation::RunBody(double maxSimTime)
 
         // update the global time
         Pedestrian::SetGlobalTime(t);
-
         // write the trajectories
         if(0 == frameNr % writeInterval) {
             _iod->WriteFrame(frameNr / writeInterval, _building.get());
             RotateOutputFile();
         }
-
         if((!_gotSources) &&
            ((frameNr < 100 && frameNr % 10 == 0) || (frameNr > 100 && frameNr % 100 == 0))) {
             LOG_INFO(
@@ -547,7 +489,6 @@ double Simulation::RunBody(double maxSimTime)
         }
 
         ++frameNr;
-
         //Trigger JPSfire Toxicity Analysis
         //only executed every 3 seconds
         if(fmod(Pedestrian::GetGlobalTime(), 3) == 0) {
@@ -555,7 +496,6 @@ double Simulation::RunBody(double maxSimTime)
                 ped->ConductToxicityAnalysis();
             }
         }
-
         //init train trainOutfloww
         for(auto tab : TrainTimeTables) {
             trainOutflow[tab.first] = 0;
@@ -563,7 +503,6 @@ double Simulation::RunBody(double maxSimTime)
         // regulate flow
         for(auto & itr : _building->GetAllTransitions()) {
             Transition * Trans = itr.second;
-
             Trans->UpdateTemporaryState(_deltaT);
             // regulate train doorusage
             std::string transType = Trans->GetType();

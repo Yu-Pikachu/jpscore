@@ -26,7 +26,7 @@
  *
  **/
 
-#include "routing/smoke_router/sensor/AbstractSensor.h"
+#include "routing/sign_router/sensor/AbstractSensor.h"
 
 #include <memory>
 

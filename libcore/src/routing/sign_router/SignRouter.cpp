@@ -1,5 +1,5 @@
 /**
- * \file        SmokeRouter.cpp
+ * \file        SignRouter.cpp
  * \date        Feb 1, 2014
  * \version     v0.7
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
@@ -24,7 +24,7 @@
  *
  *
  **/
-#include "SmokeRouter.h"
+#include "SignRouter.h"
 
 #include "BrainStorage.h"
 #include "general/Logger.h"
@@ -33,31 +33,28 @@
 
 #include <tinyxml.h>
 
-SmokeRouter::SmokeRouter()
+SignRouter::SignRouter()
 {
     building = nullptr;
-    //    cm_storage=nullptr;
-    //    sensor_manager=nullptr;
 }
 
-SmokeRouter::SmokeRouter(int id, RoutingStrategy s) : Router(id, s)
+SignRouter::SignRouter(int id, RoutingStrategy s) : Router(id, s)
 {
     building = nullptr;
-    //    cm_storage=nullptr;
-    //    sensor_manager=nullptr;
 }
 
-SmokeRouter::~SmokeRouter()
+SignRouter::~SignRouter()
 {
-    //delete brain_storage;
     delete sensor_manager;
 }
 
-int SmokeRouter::FindExit(Pedestrian * p)
+int SignRouter::FindExit(Pedestrian * p)
 {
+    //std::cout<<"FindExit"<<std::endl;
+    return SignRouter::FindDestination(p);//Yu changed 04.11.2020
+    /*
     //check for former goal.
     if((*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->HadNoDestination()) {
-        //std::cout<<"exit1"<<" "<<p->GetID()<<std::endl;
         sensor_manager->execute(p, SensorManager::INIT);
         return FindDestination(p);//Yu changed 01.04.2020
     }
@@ -65,7 +62,6 @@ int SmokeRouter::FindExit(Pedestrian * p)
     //Check if the Pedestrian already has a Dest. or changed subroom and needs a new one.
     else if((*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->ChangedSubRoom()) {
         //execute periodical sensors
-        //std::cout<<"exit2"<<" "<<p->GetID()<<std::endl;
         sensor_manager->execute(p, SensorManager::CHANGED_ROOM);
         int status = FindDestination(p);
         (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->UpdateSubRoom();
@@ -74,54 +70,36 @@ int SmokeRouter::FindExit(Pedestrian * p)
 
     // check if ped reached a hline
     else if((*brain_storage)[p]->HlineReached()) {
-        //std::cout<<"exit3"<<" "<<p->GetID()<<std::endl;
         int status = FindDestination(p);
         return status;
     }
 
     else{
-        //std::cout<<"exit4"<<" "<<p->GetID()<<std::endl;
         int status = FindDestination(p);
         return status;
     }   //Yu changed 03.06.2020, add three else
+    */
 }
 
-int SmokeRouter::FindDestination(Pedestrian * p)
+int SignRouter::FindDestination(Pedestrian * p)
 {
     // Discover doors
-    sensor_manager->execute(p, SensorManager::NO_WAY);
-    //check if there is a way to the outside the pedestrian knows (in the cognitive map)
+    //std::cout<<"FindDest"<<std::endl;
+    //std::cout<<"ped "<<p->GetID()<<std::endl;
+    sensor_manager->execute(p, SensorManager::SIGN);//set factors
+    //std::cout<<"FindDest-1"<<std::endl;
     const GraphEdge * destination = nullptr;
-    destination = (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->GetDestination();
-    if(destination == nullptr) {
-        //no destination was found, now we could start the discovery!
-        //1. run the no_way sensors for room discovery.
-        //sensor_manager->execute(p, SensorManager::NO_WAY);
-        //check if this was enough for finding a global path to the exit
-
-        //destination = (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->GetDestination();
-        //if(destination == nullptr) {
-            //we still do not have a way. lets take the "best" local edge
-            //for this we don't calculate the cost to exit but calculate the cost for the edges at the actual vertex.
-        destination =
-            (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->GetLocalDestination();
-        //}
-    }
-    //if we still could not found any destination we are lost! Pedestrian will be deleted
-    //no destination should just appear in bug case or closed rooms.
+    //destination = (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->GetDestination();//这会寻找全局最优
+    destination = (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->GetLocalDestination();
+    //std::cout<<"FindDest-2"<<std::endl;
     if(destination == nullptr) {
         LOG_ERROR("Pedestrian {:d} was unable to find any destination", p->GetID());
         return -1;
     }
-
+    //std::cout<<"FindDest-3"<<std::endl;
     (*brain_storage)[p]->GetCognitiveMap().GetGraphNetwork()->AddDestination(destination);
-    //sensor_manager->execute(p, SensorManager::NEW_DESTINATION);
-    if(destination == nullptr){std::cout<<"dest-6"<<std::endl;}
-    
     const Crossing * nextTarget = destination->GetCrossing();
-
     const NavLine * nextNavLine = (*brain_storage)[p]->GetNextNavLine(nextTarget);
-
     if(nextNavLine == nullptr) {
         LOG_ERROR("No visible next subtarget found. PED {:d}", p->GetID());
         return -1;
@@ -129,13 +107,14 @@ int SmokeRouter::FindDestination(Pedestrian * p)
     //setting crossing to ped
     p->SetExitLine(nextNavLine);
     p->SetExitIndex(nextNavLine->GetUniqueID());
+    p->AddLastDestination(nextTarget->GetID());//record used destination
     return nextNavLine->GetUniqueID();//Yu changed in 02.04.2020
 }
 
 
-bool SmokeRouter::Init(Building * b)
+bool SignRouter::Init(Building * b)
 {
-    LOG_INFO("Init SmokeRouter");
+    LOG_INFO("Init SignRouter");
     building = b;
 
     LoadRoutingInfos(GetRoutingInfoFile());
@@ -156,17 +135,17 @@ bool SmokeRouter::Init(Building * b)
 }
 
 
-const optStorage & SmokeRouter::getOptions() const
+const optStorage & SignRouter::getOptions() const
 {
     return options;
 }
 
-void SmokeRouter::addOption(const std::string & key, const std::vector<std::string> & value)
+void SignRouter::addOption(const std::string & key, const std::vector<std::string> & value)
 {
     options.insert(std::make_pair(key, value));
 }
 
-bool SmokeRouter::LoadRoutingInfos(const fs::path & filename)
+bool SignRouter::LoadRoutingInfos(const fs::path & filename)
 {
     if(filename.empty())
         return true;
@@ -177,7 +156,7 @@ bool SmokeRouter::LoadRoutingInfos(const fs::path & filename)
 
     TiXmlDocument docRouting(filename.string());
     if(!docRouting.LoadFile()) {
-        LOG_ERROR("SmokeRouter, could not parse project file {}: \t%s", docRouting.ErrorDesc());
+        LOG_ERROR("SignRouter, could not parse project file {}: \t%s", docRouting.ErrorDesc());
         return false;
     }
 
@@ -235,7 +214,7 @@ bool SmokeRouter::LoadRoutingInfos(const fs::path & filename)
     return true;
 }
 
-fs::path SmokeRouter::GetRoutingInfoFile()
+fs::path SignRouter::GetRoutingInfoFile()
 {
     TiXmlDocument doc(building->GetProjectFilename().string());
     if(!doc.LoadFile()) {
