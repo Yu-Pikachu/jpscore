@@ -85,7 +85,7 @@ int SignRouter::FindDestination(Pedestrian * p)
 {
     // Discover doors
     //std::cout<<"FindDest"<<std::endl;
-    //std::cout<<"ped "<<p->GetID()<<std::endl;
+    std::cout<<"ped "<<p->GetID()<<std::endl;
     sensor_manager->execute(p, SensorManager::SIGN);//set factors
     //std::cout<<"FindDest-1"<<std::endl;
     const GraphEdge * destination = nullptr;
@@ -108,6 +108,7 @@ int SignRouter::FindDestination(Pedestrian * p)
     p->SetExitLine(nextNavLine);
     p->SetExitIndex(nextNavLine->GetUniqueID());
     p->AddLastDestination(nextTarget->GetID());//record used destination
+    std::cout<<"findexit "<<nextTarget->GetID()<<std::endl;
     return nextNavLine->GetUniqueID();//Yu changed in 02.04.2020
 }
 
